@@ -8,6 +8,7 @@ if ( ! defined('WP_CLI') || ! WP_CLI ) {
  */
 class Demo_Generator extends WP_CLI_Command {
 	const API_URL = 'https://en.wikipedia.org/w/api.php';
+	const IMAGE_URL = 'http://www.pexels.com/search/';
 
 	/**
 	 * Populate a site in a network with content from wikipedia and images from pexels.
@@ -45,6 +46,7 @@ class Demo_Generator extends WP_CLI_Command {
 		$site = $args[0];
 		$wiki_cat = $assoc_args['from'];
 		$pexel_cat = isset( $assoc_args['images-from'] ) ? $assoc_args['images-from']: $wiki_cat;
+		$add_image = self::parse_image_chance( $assoc_args );
 
 		// Collect our post type counts
 		$post_types = array();
@@ -68,6 +70,7 @@ class Demo_Generator extends WP_CLI_Command {
 		);
 		$post = apply_filters( 'demo_gen_default_post', $post );
 
+		// Pull articles
 		$article_list = self::get_article_list( $wiki_cat, $total_articles );
 		if ( is_wp_error( $article_list ) ) {
 			WP_CLI::error( $article_list->get_error_message() );
@@ -75,6 +78,13 @@ class Demo_Generator extends WP_CLI_Command {
 
 		// Un-alphabetize the list
 		shuffle( $article_list );
+
+		if ( count( $article_list ) < $total_articles ) {
+			WP_CLI::warning( sprintf( __( "Only %s articles were found in this category.", 'demo-gen' ), count( $article_list ) ) );
+		}
+
+		// Pull images
+		$image_list = self::get_image_list( $pexel_cat, $total_articles );
 
 		foreach( $article_list as $title ){
 			foreach ( $post_types as $post_type => $count ) {
@@ -119,6 +129,15 @@ class Demo_Generator extends WP_CLI_Command {
 			if ( is_wp_error( $post_id ) ) {
 				// This shouldn't error, we should break and investigate.
 				WP_CLI::error( $post_id->get_error_message() );
+			}
+
+			// If the random number is less than the threshold, add an image.
+			if ( mt_rand( 0, 100 ) <= $add_image ) {
+				$key = array_rand( $image_list );
+				WP_CLI::line( sprintf( "Downloading & attaching %s", basename( $image_list[ $key ] ) ) );
+				$attachment = self::set_image( $image_list[ $key ], $post_id );
+				set_post_thumbnail( $post_id, $attachment );
+				unset( $image_list[ $key ] );
 			}
 
 			WP_CLI::line( sprintf( "Created %s [%s], from %s", $post_type, $post_id, $title ) );
@@ -270,6 +289,132 @@ class Demo_Generator extends WP_CLI_Command {
 
 		// Format the timestamp
 		return date( 'Y-m-d H:i:s', $timestamp );
+	}
+
+	/**
+	 * Get the image chance.
+	 */
+	private function parse_image_chance( $assoc_args ){
+		$add_image = isset( $assoc_args['with-images'] ) ? $assoc_args['with-images']: 'most';
+		switch ( $add_image ) {
+			case 'all':
+				$add_image = 100;
+				break;
+			case 'some':
+				$add_image = 50;
+				break;
+			case 'few':
+				$add_image = 25;
+				break;
+			case 'none':
+				$add_image = 0;
+				break;
+			case 'most':
+			default:
+				$add_image = 75;
+				break;
+		}
+		return $add_image;
+	}
+
+	/**
+	 * Get a list of image URLs.
+	 * Return a WP_Error if we don't get any images.
+	 *
+	 * @param  object  $body    Response object from API
+	 * @return string|WP_Error  Image? text, or error
+	 */
+	private function get_image_list( $category, $max_images = 10 ){
+		$image_list = false; //get_transient( $category . ':' . $max_images );
+
+		if ( false == $image_list ) {
+			$image_request = self::IMAGE_URL . urlencode( $category ) . '/feed/';
+			$rss = fetch_feed( $image_request ); // By default, caches 12hrs.
+
+			if ( is_wp_error( $rss ) ) {
+				return $rss;
+			}
+
+			// Figure out how many total items there are, but limit it.
+			$maxitems = $rss->get_item_quantity( $max_images );
+			if ( $maxitems < $max_images ) {
+				return new WP_Error( 'short-list', __( "Not enough images returned.", 'demo-gen' ) );
+			}
+			$rss_items = $rss->get_items( 0, $maxitems );
+
+			$image_list = array();
+			foreach ( $rss_items as $item ) {
+				if ( $url = $item->get_permalink() ) {
+					$image_list[] = self::get_image_from_url( $url );
+				}
+			}
+
+			set_transient( $category . ':' . $max_images, $image_list );
+		}
+
+		return $image_list;
+	}
+
+	/**
+	 * Get a specific image URL from a given post.
+	 * Return a WP_Error if we don't get an image.
+	 *
+	 * @param  string  $url     Image post URL
+	 * @return string|WP_Error  Image URL, or error
+	 */
+	private function get_image_from_url( $url ) {
+		$response = wp_remote_get( $url );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		if ( ! $body ) {
+			return new WP_Error( 'empty-body', __( "The response body is empty.", 'demo-gen' ) );
+		}
+
+		$image_found = preg_match_all( '/<meta itemprop="image"[^>]*content="([^"]*)"[^>]*>/', $body, $matches );
+		// $image_found = preg_match_all( '/<a class="js-download"[^>]*href="([^"]*)"[^>]*>/', $body, $matches );
+		if ( $image_found && isset( $matches[1] ) && isset( $matches[1][0] ) ) {
+			return $matches[1][0];
+		}
+
+		return new WP_Error( 'empty-image', __( "No image was found.", 'demo-gen' ) );
+	}
+
+	/**
+	 * Download an image from the specified URL and attach it to a post.
+	 *
+	 * @param  string  $file     The URL of the image to download
+	 * @param  int     $post_id  The post ID the media is to be associated with
+	 * @return string|WP_Error   Populated HTML img tag on success
+	 */
+	private function set_image( $file, $post_id = -1 ) {
+		if ( ! empty( $file ) ) {
+			// Set variables for storage, fix file filename for query strings.
+			preg_match( '/[^\?]+\.(jpe?g|jpe|gif|png)\b/i', $file, $matches );
+			$file_array = array();
+			$file_array['name'] = basename( $matches[0] );
+
+			// Download file to temp location.
+			$file_array['tmp_name'] = download_url( $file );
+
+			// If error storing temporarily, return the error.
+			if ( is_wp_error( $file_array['tmp_name'] ) ) {
+				return $file_array['tmp_name'];
+			}
+
+			// Do the validation and storage stuff.
+			$id = media_handle_sideload( $file_array, $post_id );
+
+			// If error storing permanently, unlink.
+			if ( is_wp_error( $id ) ) {
+				@unlink( $file_array['tmp_name'] );
+				return $id;
+			}
+
+			return $id;
+		}
 	}
 }
 
