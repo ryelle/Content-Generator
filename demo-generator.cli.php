@@ -85,6 +85,9 @@ class Demo_Generator extends WP_CLI_Command {
 
 		// Pull images
 		$image_list = self::get_image_list( $pexel_cat, $total_articles );
+		if ( is_wp_error( $image_list ) ){
+			WP_CLI::warning( $image_list->get_error_message() );
+		}
 
 		foreach( $article_list as $title ){
 			foreach ( $post_types as $post_type => $count ) {
@@ -132,7 +135,7 @@ class Demo_Generator extends WP_CLI_Command {
 			}
 
 			// If the random number is less than the threshold, add an image.
-			if ( mt_rand( 0, 100 ) <= $add_image ) {
+			if ( ( ! is_wp_error( $image_list ) ) && ( mt_rand( 0, 100 ) <= $add_image ) ) {
 				$key = array_rand( $image_list );
 				WP_CLI::line( sprintf( "Downloading & attaching %s", basename( $image_list[ $key ] ) ) );
 				$attachment = self::set_image( $image_list[ $key ], $post_id );
