@@ -20,9 +20,6 @@ class Demo_Generator extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <site>
-	 * : The url or ID of a site in the network to fill
-	 *
 	 * --<field>=<value>
 	 * : Number of posts, pages, etc to create, in format: --post_type=10
 	 *
@@ -48,7 +45,6 @@ class Demo_Generator extends WP_CLI_Command {
 	function populate( $args, $assoc_args ) {
 		global $wp_taxonomies;
 
-		$site = $args[0];
 		$wiki_cat = $assoc_args['from'];
 		$pexel_cat = isset( $assoc_args['images-from'] ) ? $assoc_args['images-from']: $wiki_cat;
 		$add_image = self::parse_image_chance( $assoc_args );
