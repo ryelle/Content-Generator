@@ -85,8 +85,8 @@ class Demo_Generator extends WP_CLI_Command {
 
 		// Set up default post
 		$post = array(
-			'post_content'   => $text,
-			'post_title'     => $title,
+			'post_content'   => '',
+			'post_title'     => '',
 			'post_status'    => 'publish',
 			'post_type'      => 'post',
 			'post_author'    => get_current_user_id(),
@@ -108,12 +108,15 @@ class Demo_Generator extends WP_CLI_Command {
 		}
 
 		// Pull images
-		$image_list = self::get_image_list( $pexel_cat, $total_articles );
-		if ( is_wp_error( $image_list ) ){
-			WP_CLI::warning( $image_list->get_error_message() );
+		$image_list = array();
+		if ( 0 !== $add_image ) {
+			$image_list = self::get_image_list( $pexel_cat, $total_articles );
+			if ( is_wp_error( $image_list ) ){
+				WP_CLI::warning( $image_list->get_error_message() );
+			}
 		}
 
-		foreach( $article_list as $title ){
+		foreach ( $article_list as $title ) {
 			foreach ( $post_types as $post_type => $count ) {
 				if ( $count > 0 ) {
 					$post_types[ $post_type ]--;
