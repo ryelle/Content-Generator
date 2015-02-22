@@ -21,7 +21,7 @@ class Demo_Generator extends WP_CLI_Command {
 	 * ## OPTIONS
 	 *
 	 * --<field>=<value>
-	 * : Number of posts, pages, etc to create, in format: --post_type=10
+	 * : Number of posts, pages, etc to create, in format: --<post_type>=10
 	 *
 	 * --from=<category>
 	 * : Wikipedia category to pull content from
