@@ -70,6 +70,16 @@ class Demo_Generator extends WP_CLI_Command {
 			}
 		}
 
+		if ( isset( $assoc_args['replace'] ) && $assoc_args['replace'] ) {
+			foreach ($post_types as $post_type => $num ) {
+				$ids = WP_CLI::launch_self( "post list", array(), array( 'post_type' => $post_type, 'format' => 'ids' ), false, true );
+				if ( 0 == $ids->return_code && $ids->stdout ) {
+					$delete = WP_CLI::launch_self( "post delete", explode( ' ', $ids->stdout ), array( 'force' => true ), false );
+					WP_CLI::line( "Deleted existing {$post_type}s.");
+				}
+			}
+		}
+
 		// How many articles should we request from Wikipedia?
 		$total_articles = array_sum( $post_types );
 
