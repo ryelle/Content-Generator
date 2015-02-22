@@ -51,9 +51,22 @@ class Demo_Generator extends WP_CLI_Command {
 
 		// Collect our post type counts
 		$post_types = array();
+		$supports_images = get_theme_support( 'post-thumbnails' );
+		if ( is_array( $supports_images ) ) {
+			$supports_images = $supports_images[0];
+		}
+
 		foreach ( get_post_types( array( 'public' => true ) ) as $post_type ){
 			if ( isset( $assoc_args[ $post_type ] ) ) {
 				$post_types[ $post_type ] = $assoc_args[ $post_type ];
+
+				// Add a warning if we're trying to add images to a type that doesn't support them.
+				if ( true === $supports_images || ! $add_image ) { // All types support images, or not adding images.
+					continue;
+				}
+				if ( ! in_array( $post_type, $supports_images ) ) {
+					WP_CLI::warning( "Your current theme does not support featured images on post type '$post_type'." );
+				}
 			}
 		}
 
