@@ -1,4 +1,9 @@
 <?php
+/**
+ * Plugin Name: Content Generator
+ * Description: Pull content from wikipedia & photos from pexels for populating a demo or stage site.
+ */
+
 if ( ! defined('WP_CLI') || ! WP_CLI ) {
 	return;
 }
