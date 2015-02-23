@@ -291,6 +291,10 @@ class Demo_Generator extends WP_CLI_Command {
 			if ( is_object( $article ) && isset( $article->categories ) ) {
 				foreach ( $article->categories as $cat ) {
 					$cat = str_replace( 'Category:', '', $cat->title );
+					// Let's not import the really long categories...
+					if ( str_word_count( $cat ) > 4 ) {
+						continue;
+					}
 					$term = term_exists( $cat, 'category' );
 					if ( ! $term ) {
 						$term = wp_insert_term( $cat, 'category' );
