@@ -164,7 +164,6 @@ class Demo_Generator extends WP_CLI_Command {
 			// If the random number is less than the threshold, add an image.
 			if ( ( ! is_wp_error( $image_list ) ) && ( mt_rand( 0, 100 ) <= $add_image ) ) {
 				$key = array_rand( $image_list );
-				WP_CLI::line( sprintf( "Downloading & attaching %s", basename( $image_list[ $key ] ) ) );
 				$attachment = self::set_image( $image_list[ $key ], $post_id );
 				set_post_thumbnail( $post_id, $attachment );
 				unset( $image_list[ $key ] );
@@ -420,7 +419,23 @@ class Demo_Generator extends WP_CLI_Command {
 	 * @return string|WP_Error   Populated HTML img tag on success
 	 */
 	private function set_image( $file, $post_id = -1 ) {
-		if ( ! empty( $file ) ) {
+		if ( empty( $file ) ) {
+			return new WP_Error( 'empty-file', __( "No file was specified.", 'demo-gen' ) );
+		}
+
+		$id = false;
+		$already_downloaded = get_transient( 'dg-already-downloaded' );
+		if ( $already_downloaded && is_array( $already_downloaded ) ){
+			if ( isset( $already_downloaded[ basename( $file ) ] ) ) {
+				WP_CLI::line( sprintf( "Already downloaded %s", basename( $file ) ) );
+				$id = $already_downloaded[ basename( $file ) ];
+			}
+		} else {
+			$already_downloaded = array();
+		}
+
+		if ( ! $id ) {
+			WP_CLI::line( sprintf( "Downloading & attaching %s", basename( $file ) ) );
 			// Set variables for storage, fix file filename for query strings.
 			preg_match( '/[^\?]+\.(jpe?g|jpe|gif|png)\b/i', $file, $matches );
 			$file_array = array();
@@ -443,8 +458,11 @@ class Demo_Generator extends WP_CLI_Command {
 				return $id;
 			}
 
-			return $id;
+			$already_downloaded[ basename( $file ) ] = $id;
+			set_transient( 'dg-already-downloaded', $already_downloaded );
 		}
+
+		return $id;
 	}
 }
 
