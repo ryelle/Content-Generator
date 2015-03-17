@@ -16,7 +16,7 @@ Example:
 
     wp demo populate --from=Breads --post=10 --with-images=all
 
-This grabs 10 articles in the [Breads](https://en.wikipedia.org/wiki/Category:Breads) category, and creates 10 posts, all with images from [a pexels search for "breads"](http://www.pexels.com/search/breads).
+This grabs 10 articles in the [Breads](https://simple.wikipedia.org/wiki/Category:Breads) category, and creates 10 posts, all with images from [a pexels search for "breads"](http://www.pexels.com/search/breads).
 
 You can specify other post types using the post type name as the flag: `--page=10 --my_post_type=15` etc.
 
