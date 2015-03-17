@@ -21,7 +21,7 @@ class DCG {
 			'post_title'     => '',
 			'post_status'    => 'publish',
 			'post_type'      => 'post',
-			'post_author'    => ( defined('WP_CLI') && WP_CLI ) ? get_current_blog_id(): 'demouser',
+			'post_author'    => WP_CLI ? get_current_blog_id(): 'demouser',
 			'ping_status'    => 'closed',
 			'comment_status' => 'closed',
 			'post_excerpt'   => '',

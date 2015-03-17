@@ -7,7 +7,11 @@
 require_once( __DIR__ . '/lib/api.php' );
 require_once( __DIR__ . '/lib/utilities.php' );
 
-if ( defined('WP_CLI') && WP_CLI ) {
+if ( ! defined('WP_CLI') ) {
+	define( 'WP_CLI', false );
+}
+
+if ( WP_CLI ) {
 	require_once( __DIR__ . '/view/cli.php' );
 } else {
 	require_once( __DIR__ . '/lib/wxr.php' );
