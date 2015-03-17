@@ -131,7 +131,6 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 			);
 		}
 ?>
-		<category domain="post_tag" nicename="shortcode"><![CDATA[shortcode]]></category>
 <?php if ( isset( $attached[ $post_id ] ) ) : ?>
 		<wp:postmeta>
 			<wp:meta_key>_thumbnail_id</wp:meta_key>
