@@ -92,8 +92,8 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 <channel>
 	<title>Demo Content From <?php echo $wiki_cat; ?></title>
 	<wp:wxr_version><?php echo WXR_VERSION; ?></wp:wxr_version>
-	<wp:base_site_url><?php echo $api::REPLACE_URL; ?></wp:base_site_url>
-	<wp:base_blog_url><?php echo $api::REPLACE_URL; ?></wp:base_blog_url>
+	<wp:base_site_url><?php echo esc_url( $api::REPLACE_URL ); ?></wp:base_site_url>
+	<wp:base_blog_url><?php echo esc_url( $api::REPLACE_URL ); ?></wp:base_blog_url>
 
 <?php foreach ( $articles as $post_id => $title ) :
 	foreach ( $post_types as $post_type => $count ) {
@@ -113,21 +113,21 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 		<title><?php echo apply_filters( 'the_title_rss', $post['post_title'] ); ?></title>
 		<pubDate><?php echo mysql2date( 'D, d M Y H:i:s +0000', $post['post_date'], false ); ?></pubDate>
 		<dc:creator><?php echo dcg_wxr_cdata( $post['post_author'] ); ?></dc:creator>
-		<guid isPermaLink="false"><?php echo $post['guid']; ?></guid>
+		<guid isPermaLink="false"><?php echo esc_url( $post['guid'] ); ?></guid>
 		<description></description>
 		<content:encoded><?php echo dcg_wxr_cdata( apply_filters( 'the_content_export', $post['post_content'] ) ); ?></content:encoded>
 		<excerpt:encoded><?php echo dcg_wxr_cdata( apply_filters( 'the_excerpt_export', $post['post_excerpt'] ) ); ?></excerpt:encoded>
-		<wp:post_id><?php echo $post_id; ?></wp:post_id>
-		<wp:post_date><?php echo $post['post_date']; ?></wp:post_date>
-		<wp:post_date_gmt><?php echo $post['post_date_gmt']; ?></wp:post_date_gmt>
-		<wp:comment_status><?php echo $post['comment_status']; ?></wp:comment_status>
-		<wp:ping_status><?php echo $post['ping_status']; ?></wp:ping_status>
-		<wp:post_name><?php echo $post['post_name']; ?></wp:post_name>
-		<wp:status><?php echo $post['post_status']; ?></wp:status>
-		<wp:post_parent><?php echo $post['post_parent']; ?></wp:post_parent>
-		<wp:menu_order><?php echo $post['menu_order']; ?></wp:menu_order>
-		<wp:post_type><?php echo $post['post_type']; ?></wp:post_type>
-		<wp:post_password><?php echo $post['post_password']; ?></wp:post_password>
+		<wp:post_id><?php echo absint( $post_id ); ?></wp:post_id>
+		<wp:post_date><?php echo sanitize_text_field( $post['post_date'] ); ?></wp:post_date>
+		<wp:post_date_gmt><?php echo sanitize_text_field( $post['post_date_gmt'] ); ?></wp:post_date_gmt>
+		<wp:comment_status><?php echo sanitize_text_field( $post['comment_status'] ); ?></wp:comment_status>
+		<wp:ping_status><?php echo sanitize_text_field( $post['ping_status'] ); ?></wp:ping_status>
+		<wp:post_name><?php echo sanitize_text_field( $post['post_name'] ); ?></wp:post_name>
+		<wp:status><?php echo sanitize_text_field( $post['post_status'] ); ?></wp:status>
+		<wp:post_parent><?php echo sanitize_text_field( $post['post_parent'] ); ?></wp:post_parent>
+		<wp:menu_order><?php echo sanitize_text_field( $post['menu_order'] ); ?></wp:menu_order>
+		<wp:post_type><?php echo sanitize_text_field( $post['post_type'] ); ?></wp:post_type>
+		<wp:post_password><?php echo sanitize_text_field( $post['post_password'] ); ?></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
 <?php
 		foreach ( $post['post_category'] as $cat ) {
@@ -155,12 +155,12 @@ foreach ( $images as $post_id => $image ) :
 		<title><?php echo apply_filters( 'the_title_rss', $title ); ?></title>
 		<pubDate><?php echo mysql2date( 'D, d M Y H:i:s +0000', $gmt_date, false ); ?></pubDate>
 		<dc:creator>demouser</dc:creator>
-		<guid isPermaLink="false"><?php echo $image; ?></guid>
+		<guid isPermaLink="false"><?php echo esc_url( $image ); ?></guid>
 		<description></description>
 		<content:encoded></content:encoded>
 		<excerpt:encoded></excerpt:encoded>
-		<wp:post_id><?php echo $post_id; ?></wp:post_id>
-		<wp:post_date_gmt><?php echo $gmt_date; ?></wp:post_date_gmt>
+		<wp:post_id><?php echo absint( $post_id ); ?></wp:post_id>
+		<wp:post_date_gmt><?php echo sanitize_text_field( $gmt_date ); ?></wp:post_date_gmt>
 		<wp:post_date><?php echo get_date_from_gmt( $gmt_date ); ?></wp:post_date>
 		<wp:comment_status>closed</wp:comment_status>
 		<wp:ping_status>closed</wp:ping_status>
@@ -171,7 +171,7 @@ foreach ( $images as $post_id => $image ) :
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password>''</wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url><?php echo $image ?></wp:attachment_url>
+		<wp:attachment_url><?php echo esc_url( $image ); ?></wp:attachment_url>
 	</item>
 <?php
 endforeach;
