@@ -1,21 +1,21 @@
 <?php
 // Set these to force the download
-// $filename = 'wordpress-demo.' . date( 'Y-m-d' ) . '.xml';
-// header( 'Content-Description: File Transfer' );
-// header( 'Content-Disposition: attachment; filename=' . $filename );
+$wiki_cat = $_POST['from'];
+$filename = 'wp.' . sanitize_title( $wiki_cat ) . '.xml';
+header( 'Content-Description: File Transfer' );
+header( 'Content-Disposition: attachment; filename=' . $filename );
 
 // Set XML header
 header( 'Content-Type: text/xml; charset=' . get_option( 'blog_charset' ), true );
 
 $api = Demo_Gen_API::get_instance();
 
-if ( ! isset( $_REQUEST['from'] ) ) {
+if ( ! isset( $_POST['from'] ) ) {
 	wp_die( 'No content source was defined.' );
 }
 
-$wiki_cat = $_REQUEST['from'];
-$pexel_cat = isset( $_REQUEST['images-from'] ) ? $_REQUEST['images-from']: $wiki_cat;
-$add_image = $api->parse_image_chance( $_REQUEST );
+$pexel_cat = isset( $_POST['images-from'] ) ? $_POST['images-from']: $wiki_cat;
+$add_image = $api->parse_image_chance( $_POST );
 
 // Collect our post type counts
 global $post_types;
@@ -23,8 +23,8 @@ $post_types = array();
 
 // Use default post types
 foreach ( get_post_types( array( 'public' => true ) ) as $post_type ){
-	if ( isset( $_REQUEST[ $post_type ] ) ) {
-		$post_types[ $post_type ] = $_REQUEST[ $post_type ];
+	if ( isset( $_POST[ $post_type ] ) ) {
+		$post_types[ $post_type ] = $_POST[ $post_type ];
 	}
 }
 
