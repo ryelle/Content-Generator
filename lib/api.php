@@ -2,6 +2,7 @@
 
 class Demo_Gen_API {
 	const API_URL = 'https://simple.wikipedia.org/w/api.php';
+	const BASE_URL = 'https://simple.wikipedia.org/wiki/';
 	const IMAGE_URL = 'http://www.pexels.com/search/';
 
 	public static $_instance;
@@ -51,6 +52,16 @@ class Demo_Gen_API {
 		}
 
 		return new WP_Error( 'empty-list', sprintf( __( "No articles in %s returned.", 'demo-gen' ), $wiki_cat ) );
+	}
+
+	/**
+	 * Get the url for an article, based on title.
+	 *
+	 * @param  string  $title   Title of article to look up
+	 * @return string           URL for article page
+	 */
+	public function get_article_url( $title ) {
+		return self::BASE_URL . $title;
 	}
 
 	/**
