@@ -100,7 +100,11 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 		}
 	}
 	$post = DCG::get_post_from_article_title( $post_type, $title, $image_list );
-	$categories += $post['post_category'];
+	if ( isset( $post['post_category'] ) ) {
+		$categories += $post['post_category'];
+	} else {
+		$post['post_category'] = array();
+	}
 ?>
 	<item>
 		<title><?php echo apply_filters( 'the_title_rss', $post['post_title'] ); ?></title>
