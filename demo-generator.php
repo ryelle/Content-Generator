@@ -25,6 +25,27 @@ class Demo_Generator_UI {
 	 * Add actions & filters
 	 */
 	public function setup(){
+		add_action( 'init', array( $this, 'rewrites' ) );
+		add_action( 'template_include', array( $this, 'get_template' ) );
+	}
+
+	/**
+	 * Create our rewrite endpoint `/generator`
+	 */
+	public function rewrites() {
+		add_rewrite_tag( '%generator%', '([^&]+)' );
+		add_rewrite_rule( '^generator/?', 'index.php?generator=api', 'top' );
+	}
+
+	/**
+	 * Load the API view file, which calls the internal API and creates an XML file on the fly
+	 */
+	public function get_template( $original_template ){
+		global $wp_query;
+		if ( isset( $wp_query->query_vars['generator'] ) &&  ( 'api' == $wp_query->query_vars['generator'] ) ) {
+			return __DIR__ . '/view/api.php';
+		}
+		return $original_template;
 	}
 
 }
