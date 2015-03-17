@@ -130,6 +130,12 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 			);
 		}
 ?>
+<?php if ( isset( $attached[ $unique_post_id ] ) ) : var_dump($attached[ $unique_post_id ]); ?>
+		<wp:postmeta>
+			<wp:meta_key>_thumbnail_id</wp:meta_key>
+			<wp:meta_value><?php echo '<![CDATA[' . absint( $attached[ $unique_post_id ] ) . ']]>'; ?></wp:meta_value>
+		</wp:postmeta>
+<?php endif; ?>
 	</item>
 <?php
 	$unique_post_id++;
