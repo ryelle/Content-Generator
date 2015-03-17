@@ -1,7 +1,7 @@
 <?php
 
 class Demo_Gen_API {
-	const API_URL = 'https://en.wikipedia.org/w/api.php';
+	const API_URL = 'https://simple.wikipedia.org/w/api.php';
 	const IMAGE_URL = 'http://www.pexels.com/search/';
 
 	public static $_instance;
