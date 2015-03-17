@@ -62,6 +62,8 @@ foreach ( $article_list as $id => $title ) {
 	}
 }
 
+$unique_post_id = 1;
+
 echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 ?>
 
@@ -79,13 +81,11 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 >
 
 <channel>
-<?php foreach ( $attached as $article_id => $url ) : ?>
-	<item>
-<?php
+<?php foreach ( $attached as $article_id => $url ) :
 	$title = preg_replace('/\.[^.]+$/', '', basename( $url ) );
-	$unique_id = '';
 	$gmt_date = $api->random_date();
 ?>
+	<item>
 		<title><?php echo apply_filters( 'the_title_rss', $title ); ?></title>
 		<link>http://example.com</link>
 		<pubDate><?php echo mysql2date( 'D, d M Y H:i:s +0000', $gmt_date, false ); ?></pubDate>
@@ -94,7 +94,7 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 		<description></description>
 		<content:encoded></content:encoded>
 		<excerpt:encoded></excerpt:encoded>
-		<wp:post_id><?php echo $unique_id; ?></wp:post_id>
+		<wp:post_id><?php echo $unique_post_id; ?></wp:post_id>
 		<wp:post_date_gmt><?php echo $gmt_date; ?></wp:post_date_gmt>
 		<wp:post_date><?php echo get_date_from_gmt( $gmt_date ); ?></wp:post_date>
 		<wp:comment_status>closed</wp:comment_status>
@@ -108,16 +108,18 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 		<wp:is_sticky>0</wp:is_sticky>
 		<wp:attachment_url><?php echo $url ?></wp:attachment_url>
 	</item>
-<?php endforeach; ?>
-<?php foreach ( $article_list as $article_id => $title ) : ?>
 <?php
-		foreach ( $post_types as $post_type => $count ) {
-			if ( $count > 0 ) {
-				$post_types[ $post_type ]--;
-				break;
-			}
+	$unique_post_id++;
+endforeach;
+
+foreach ( $article_list as $article_id => $title ) :
+	foreach ( $post_types as $post_type => $count ) {
+		if ( $count > 0 ) {
+			$post_types[ $post_type ]--;
+			break;
 		}
-		$post = DCG::get_post_from_article_title( $post_type, $title, $image_list );
+	}
+	$post = DCG::get_post_from_article_title( $post_type, $title, $image_list );
 ?>
 	<item>
 		<title><?php echo apply_filters( 'the_title_rss', $post['post_title'] ); ?></title>
@@ -142,6 +144,9 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 		<wp:is_sticky>0</wp:is_sticky>
 <?php //wxr_post_taxonomy(); ?>
 	</item>
-<?php endforeach; ?>
+<?php
+	$unique_post_id++;
+endforeach;
+?>
 </channel>
 </rss>
