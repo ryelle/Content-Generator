@@ -28,7 +28,7 @@ function dcg_wxr_category( $cat, $term_id ) {
 		<wp:term_id><?php echo $term_id; ?></wp:term_id>
 		<wp:category_nicename><?php echo sanitize_title( $cat ); ?></wp:category_nicename>
 		<wp:category_parent><?php echo ''; ?></wp:category_parent>
-		<?php echo '<wp:cat_name>' . dcg_wxr_cdata( $cat ) . '</wp:cat_name>'; ?>
+		<?php echo '<wp:cat_name>' . dcg_wxr_cdata( $cat ) . "</wp:cat_name>\n"; ?>
 	</wp:category>
 <?php
 }
