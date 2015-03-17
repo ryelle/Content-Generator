@@ -21,8 +21,13 @@ class DCG {
 			'post_title'     => '',
 			'post_status'    => 'publish',
 			'post_type'      => 'post',
-			'post_author'    => get_current_user_id(),
+			'post_author'    => ( defined('WP_CLI') && WP_CLI ) ? get_current_blog_id(): 'demouser',
 			'ping_status'    => 'closed',
+			'comment_status' => 'closed',
+			'post_excerpt'   => '',
+			'post_parent'    => 0,
+			'menu_order'     => 0,
+			'post_password'  => '',
 		);
 		$post = apply_filters( 'demo_gen_default_post', $post );
 
@@ -38,10 +43,13 @@ class DCG {
 			return;
 		}
 
+		$post['guid']          = $api->get_article_url( $title );
 		$post['post_content']  = $text;
 		$post['post_title']    = $title;
+		$post['post_name']     = sanitize_title( $title );
 		$post['post_type']     = $post_type;
-		$post['post_date']     = $api->random_date();
+		$post['post_date_gmt'] = $api->random_date();
+		$post['post_date']     = get_date_from_gmt( $post['post_date_gmt'] );
 
 		// Check that we're handling a post type that supports categories.
 		if ( isset( $wp_taxonomies['category'] ) && in_array( $post_type, $wp_taxonomies['category']->object_type ) ) {
