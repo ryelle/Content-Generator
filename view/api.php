@@ -52,19 +52,20 @@ if ( 0 !== $add_image ) {
 	}
 }
 
-// If the random number is less than the threshold, add an image.
-$attached = array();
-foreach ( $article_list as $article_id => $title ) {
+// Assign IDs and images to posts
+$unique_post_id = 1;
+$articles = $images = $attached = array();
+foreach ( $article_list as $title ) {
+	$articles[ $unique_post_id ] = $title;
 	if ( ( ! is_wp_error( $image_list ) ) && ( mt_rand( 0, 100 ) <= $add_image ) ) {
 		$key = array_rand( $image_list );
-		$attached[ $article_id + 1 ] = $image_list[ $key ];
+		$attached[ $unique_post_id ] = $unique_post_id + 1;
+		$unique_post_id++;
+		$images[ $unique_post_id ] = $image_list[ $key ];
 		unset( $image_list[ $key ] );
 	}
+	$unique_post_id++;
 }
-
-// Wierd things can happen if the IDs are 0
-$unique_post_id = 1;
-$unique_term_id = 1;
 
 // Collect the cats
 $categories = array();
@@ -91,7 +92,7 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 	<wp:base_site_url><?php echo $api->REPLACE_URL; ?></wp:base_site_url>
 	<wp:base_blog_url><?php echo $api->REPLACE_URL; ?></wp:base_blog_url>
 
-<?php foreach ( $article_list as $title ) :
+<?php foreach ( $articles as $post_id => $title ) :
 	foreach ( $post_types as $post_type => $count ) {
 		if ( $count > 0 ) {
 			$post_types[ $post_type ]--;
@@ -110,7 +111,7 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 		<description></description>
 		<content:encoded><?php echo dcg_wxr_cdata( apply_filters( 'the_content_export', $post['post_content'] ) ); ?></content:encoded>
 		<excerpt:encoded><?php echo dcg_wxr_cdata( apply_filters( 'the_excerpt_export', $post['post_excerpt'] ) ); ?></excerpt:encoded>
-		<wp:post_id><?php echo $unique_post_id; ?></wp:post_id>
+		<wp:post_id><?php echo $post_id; ?></wp:post_id>
 		<wp:post_date><?php echo $post['post_date']; ?></wp:post_date>
 		<wp:post_date_gmt><?php echo $post['post_date_gmt']; ?></wp:post_date_gmt>
 		<wp:comment_status><?php echo $post['comment_status']; ?></wp:comment_status>
@@ -130,18 +131,18 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 			);
 		}
 ?>
-<?php if ( isset( $attached[ $unique_post_id ] ) ) : var_dump($attached[ $unique_post_id ]); ?>
+		<category domain="post_tag" nicename="shortcode"><![CDATA[shortcode]]></category>
+<?php if ( isset( $attached[ $post_id ] ) ) : ?>
 		<wp:postmeta>
 			<wp:meta_key>_thumbnail_id</wp:meta_key>
-			<wp:meta_value><?php echo '<![CDATA[' . absint( $attached[ $unique_post_id ] ) . ']]>'; ?></wp:meta_value>
+			<wp:meta_value><?php echo '<![CDATA[' . absint( $attached[ $post_id ] ) . ']]>'; ?></wp:meta_value>
 		</wp:postmeta>
 <?php endif; ?>
 	</item>
 <?php
-	$unique_post_id++;
 endforeach;
 
-foreach ( $attached as $parent_id => $image ) :
+foreach ( $images as $post_id => $image ) :
 	$title = preg_replace('/\.[^.]+$/', '', basename( $image ) );
 	$gmt_date = $api->random_date();
 ?>
@@ -154,14 +155,14 @@ foreach ( $attached as $parent_id => $image ) :
 		<description></description>
 		<content:encoded></content:encoded>
 		<excerpt:encoded></excerpt:encoded>
-		<wp:post_id><?php echo $unique_post_id; ?></wp:post_id>
+		<wp:post_id><?php echo $post_id; ?></wp:post_id>
 		<wp:post_date_gmt><?php echo $gmt_date; ?></wp:post_date_gmt>
 		<wp:post_date><?php echo get_date_from_gmt( $gmt_date ); ?></wp:post_date>
 		<wp:comment_status>closed</wp:comment_status>
 		<wp:ping_status>closed</wp:ping_status>
 		<wp:post_name><?php echo sanitize_title( $title ); ?></wp:post_name>
 		<wp:status>inherit</wp:status>
-		<wp:post_parent><?php echo $parent_id; ?></wp:post_parent>
+		<wp:post_parent><?php echo array_search( $post_id, $attached ); ?></wp:post_parent>
 		<wp:menu_order>0</wp:menu_order>
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password>''</wp:post_password>
@@ -169,10 +170,9 @@ foreach ( $attached as $parent_id => $image ) :
 		<wp:attachment_url><?php echo $image ?></wp:attachment_url>
 	</item>
 <?php
-	$unique_post_id++;
 endforeach;
-?>
-<?php
+
+$unique_term_id = 1;
 $categories = array_unique( $categories );
 foreach ( $categories as $cat ) {
 	dcg_wxr_category( $cat, $unique_term_id );
