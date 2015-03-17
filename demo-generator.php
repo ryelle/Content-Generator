@@ -7,7 +7,7 @@
 require_once( __DIR__ . '/lib/api.php' );
 
 if ( defined('WP_CLI') && WP_CLI ) {
-	require_once( __DIR__ . '/demo-generator.cli.php' );
+	require_once( __DIR__ . '/lib/cli.php' );
 }
 
 class Demo_Generator_UI {
