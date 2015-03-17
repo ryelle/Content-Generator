@@ -52,6 +52,16 @@ if ( 0 !== $add_image ) {
 	}
 }
 
+// If the random number is less than the threshold, add an image.
+$attached = array();
+foreach ( $article_list as $id => $title ) {
+	if ( ( ! is_wp_error( $image_list ) ) && ( mt_rand( 0, 100 ) <= $add_image ) ) {
+		$key = array_rand( $image_list );
+		$attached[$id] = $image_list[ $key ];
+		unset( $image_list[ $key ] );
+	}
+}
+
 echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 ?>
 
@@ -69,7 +79,37 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 >
 
 <channel>
-<?php foreach ( $article_list as $title ) : ?>
+<?php foreach ( $attached as $article_id => $url ) : ?>
+	<item>
+<?php
+	$title = preg_replace('/\.[^.]+$/', '', basename( $url ) );
+	$unique_id = '';
+	$gmt_date = $api->random_date();
+?>
+		<title><?php echo apply_filters( 'the_title_rss', $title ); ?></title>
+		<link>http://example.com</link>
+		<pubDate><?php echo mysql2date( 'D, d M Y H:i:s +0000', $gmt_date, false ); ?></pubDate>
+		<dc:creator>demouser</dc:creator>
+		<guid isPermaLink="false"><?php echo $url; ?></guid>
+		<description></description>
+		<content:encoded></content:encoded>
+		<excerpt:encoded></excerpt:encoded>
+		<wp:post_id><?php echo $unique_id; ?></wp:post_id>
+		<wp:post_date_gmt><?php echo $gmt_date; ?></wp:post_date_gmt>
+		<wp:post_date><?php echo get_date_from_gmt( $gmt_date ); ?></wp:post_date>
+		<wp:comment_status>closed</wp:comment_status>
+		<wp:ping_status>closed</wp:ping_status>
+		<wp:post_name><?php echo sanitize_title( $title ); ?></wp:post_name>
+		<wp:status>inherit</wp:status>
+		<wp:post_parent><?php echo $article_id + 1; ?></wp:post_parent>
+		<wp:menu_order>0</wp:menu_order>
+		<wp:post_type>attachment</wp:post_type>
+		<wp:post_password>''</wp:post_password>
+		<wp:is_sticky>0</wp:is_sticky>
+		<wp:attachment_url><?php echo $url ?></wp:attachment_url>
+	</item>
+<?php endforeach; ?>
+<?php foreach ( $article_list as $article_id => $title ) : ?>
 <?php
 		foreach ( $post_types as $post_type => $count ) {
 			if ( $count > 0 ) {
