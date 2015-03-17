@@ -1,4 +1,6 @@
 <?php
+// Use Core's WXR version, since we use core's format.
+define( 'WXR_VERSION', '1.2' );
 
 /**
  * Wrap given string in XML CDATA tag.
