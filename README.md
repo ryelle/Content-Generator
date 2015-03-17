@@ -31,6 +31,8 @@ The plugin adds an endpoint `generator` expecting `POST`'d parameters matching t
     page=15
     with-images=some
 
+So we can submit a form to `/generator/` with the correct form names, and it will automatically generate and display the XML file.
+
 ### `with-images`
 
 This flag's a bit of a trick — you specify how many posts you want to have images, out of "all, most, some, few, none". This translates to a percentage chance (100%, 75%, 50%, 25%, 0%) that an image will be applied. This isn't exact by design, we want randomness in the generated content.
