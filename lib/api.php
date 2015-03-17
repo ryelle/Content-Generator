@@ -227,7 +227,7 @@ class Demo_Gen_API {
 			// Figure out how many total items there are, but limit it.
 			$maxitems = $rss->get_item_quantity( $max_images );
 			if ( $maxitems < $max_images ) {
-				return new WP_Error( 'short-list', __( "Not enough images returned.", 'demo-gen' ) );
+				DCG::warning( __( "Not enough images returned.", 'demo-gen' ) );
 			}
 			$rss_items = $rss->get_items( 0, $maxitems );
 
