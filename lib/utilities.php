@@ -14,6 +14,8 @@ class DCG {
 	 * Create the post given an article title
 	 */
 	public static function get_post_from_article_title( $post_type, $title ) {
+		global $wp_taxonomies;
+
 		$api = Demo_Gen_API::get_instance();
 
 		$post = array(
