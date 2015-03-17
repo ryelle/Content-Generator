@@ -130,7 +130,7 @@ class Demo_Gen_API {
 	 * @param  object  $body    Response object from API
 	 * @return array|WP_Error  Article categories, or error
 	 */
-	public function get_article_cats( $body ) {
+	public function get_article_cats( $body, $create = false ) {
 		if ( isset( $body->query ) && isset( $body->query->pages ) ) {
 			if ( isset( $body->query->pages->{'-1'} ) ) {
 				return new WP_Error( 'not-found', sprintf( __( "The article '%s' could not be found.", 'demo-gen' ), $body->query->pages->{'-1'}->title ) );
@@ -146,11 +146,15 @@ class Demo_Gen_API {
 					if ( str_word_count( $cat ) > 4 ) {
 						continue;
 					}
-					$term = term_exists( $cat, 'category' );
-					if ( ! $term ) {
-						$term = wp_insert_term( $cat, 'category' );
+					if ( $create ) {
+						$term = term_exists( $cat, 'category' );
+						if ( ! $term ) {
+							$term = wp_insert_term( $cat, 'category' );
+						}
+						$categories[] = (int) $term['term_id'];
+					} else {
+						$categories[] = $cat;
 					}
-					$categories[] = (int) $term['term_id'];
 				}
 				return $categories;
 			}

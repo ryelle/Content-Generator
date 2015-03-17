@@ -53,7 +53,7 @@ class DCG {
 
 		// Check that we're handling a post type that supports categories.
 		if ( isset( $wp_taxonomies['category'] ) && in_array( $post_type, $wp_taxonomies['category']->object_type ) ) {
-			$categories = $api->get_article_cats( $response );
+			$categories = $api->get_article_cats( $response, WP_CLI );
 			if ( is_wp_error( $categories ) ) {
 				DCG::warning( $categories->get_error_message() );
 				return;
