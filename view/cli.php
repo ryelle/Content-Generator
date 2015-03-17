@@ -74,17 +74,6 @@ class Demo_Generator extends WP_CLI_Command {
 		// How many articles should we request from Wikipedia?
 		$total_articles = array_sum( $post_types );
 
-		// Set up default post
-		$post = array(
-			'post_content'   => '',
-			'post_title'     => '',
-			'post_status'    => 'publish',
-			'post_type'      => 'post',
-			'post_author'    => get_current_user_id(),
-			'ping_status'    => 'closed',
-		);
-		$post = apply_filters( 'demo_gen_default_post', $post );
-
 		// Pull articles
 		$article_list = $api->get_article_list( $wiki_cat, $total_articles );
 		if ( is_wp_error( $article_list ) ) {
@@ -115,34 +104,7 @@ class Demo_Generator extends WP_CLI_Command {
 				}
 			}
 
-			$response = $api->get_article_response( $title );
-			if ( is_wp_error( $response ) ) {
-				WP_CLI::warning( $response->get_error_message() );
-				continue;
-			}
-
-			$text = $api->get_article_text( $response );
-			if ( is_wp_error( $text ) ) {
-				WP_CLI::warning( $text->get_error_message() );
-				continue;
-			}
-
-			$post['post_content']  = $text;
-			$post['post_title']    = $title;
-			$post['post_type']     = $post_type;
-			$post['post_date']     = $api->random_date();
-
-			// Check that we're handling a post type that supports categories.
-			if ( isset( $wp_taxonomies['category'] ) && in_array( $post_type, $wp_taxonomies['category']->object_type ) ) {
-				$categories = $api->get_article_cats( $response );
-				if ( is_wp_error( $categories ) ) {
-					WP_CLI::warning( $categories->get_error_message() );
-					continue;
-				}
-				$post['post_category'] = $categories;
-			}
-
-			// $post['post_excerpt'] = '';
+			$post = DCG::get_post_from_article_title( $post_type, $title );
 
 			// Can be ID or WP_Error.
 			$post_id = wp_insert_post( $post, true );
