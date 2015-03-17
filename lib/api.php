@@ -4,6 +4,7 @@ class Demo_Gen_API {
 	const API_URL = 'https://simple.wikipedia.org/w/api.php';
 	const BASE_URL = 'https://simple.wikipedia.org/wiki/';
 	const IMAGE_URL = 'http://www.pexels.com/search/';
+	const REPLACE_URL = 'http://static.pexels.com/';
 
 	public static $_instance;
 
