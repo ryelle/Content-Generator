@@ -29,6 +29,9 @@ foreach ( get_post_types( array( 'public' => true ) ) as $post_type ){
 }
 
 $total_articles = array_sum( $post_types );
+if ( ! $total_articles ) {
+	wp_die( __( "You didn't ask for any posts or pages.", 'demo-gen' ) );
+}
 
 // Pull articles
 $article_list = $api->get_article_list( $wiki_cat, $total_articles );
