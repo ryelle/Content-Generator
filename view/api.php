@@ -89,8 +89,8 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 <channel>
 	<title>Demo Content From <?php echo $wiki_cat; ?></title>
 	<wp:wxr_version><?php echo WXR_VERSION; ?></wp:wxr_version>
-	<wp:base_site_url><?php echo $api->REPLACE_URL; ?></wp:base_site_url>
-	<wp:base_blog_url><?php echo $api->REPLACE_URL; ?></wp:base_blog_url>
+	<wp:base_site_url><?php echo $api::REPLACE_URL; ?></wp:base_site_url>
+	<wp:base_blog_url><?php echo $api::REPLACE_URL; ?></wp:base_blog_url>
 
 <?php foreach ( $articles as $post_id => $title ) :
 	foreach ( $post_types as $post_type => $count ) {
