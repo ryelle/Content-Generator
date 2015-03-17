@@ -111,7 +111,6 @@ echo '<?xml version="1.0" encoding="' . get_bloginfo('charset') . "\" ?>\n";
 ?>
 	<item>
 		<title><?php echo apply_filters( 'the_title_rss', $post['post_title'] ); ?></title>
-		<link>http://example.com</link>
 		<pubDate><?php echo mysql2date( 'D, d M Y H:i:s +0000', $post['post_date'], false ); ?></pubDate>
 		<dc:creator><?php echo dcg_wxr_cdata( $post['post_author'] ); ?></dc:creator>
 		<guid isPermaLink="false"><?php echo $post['guid']; ?></guid>
@@ -154,7 +153,6 @@ foreach ( $images as $post_id => $image ) :
 ?>
 	<item>
 		<title><?php echo apply_filters( 'the_title_rss', $title ); ?></title>
-		<link>http://example.com</link>
 		<pubDate><?php echo mysql2date( 'D, d M Y H:i:s +0000', $gmt_date, false ); ?></pubDate>
 		<dc:creator>demouser</dc:creator>
 		<guid isPermaLink="false"><?php echo $image; ?></guid>
