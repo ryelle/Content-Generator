@@ -62,7 +62,7 @@ class Demo_Gen_API {
 	 * @return string           URL for article page
 	 */
 	public function get_article_url( $title ) {
-		return self::BASE_URL . $title;
+		return self::BASE_URL . preg_replace( '/\s+/', '_', $title );
 	}
 
 	/**
